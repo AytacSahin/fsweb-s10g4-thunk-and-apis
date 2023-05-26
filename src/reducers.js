@@ -5,6 +5,7 @@ import {
   FETCH_LOADING,
   FETCH_ERROR,
   GET_FAVS_FROM_LS,
+  DELETE_ALL,
 } from "./actions";
 
 const initial = {
@@ -24,23 +25,54 @@ function readFavsFromLocalStorage() {
 
 export function myReducer(state = initial, action) {
   switch (action.type) {
+
     case FAV_ADD:
-      return state;
+      const addFav_addLocal = {
+        ...state,
+        favs: state.favs.find(item => item.id === action.payload.id) ? state.favs : [...state.favs, action.payload]
+      }
+      writeFavsToLocalStorage(addFav_addLocal);
+      return addFav_addLocal;
 
     case FAV_REMOVE:
-      return state;
-
-    case FETCH_SUCCESS:
-      return state;
+      const delFav_delLocal = {
+        ...state,
+        favs: state.favs.filter(item => item.id !== action.payload)
+      }
+      writeFavsToLocalStorage(delFav_delLocal);
+      return delFav_delLocal;
 
     case FETCH_LOADING:
-      return state;
+      return {
+        ...state,
+        loading: true
+      };
+
+    case FETCH_SUCCESS:
+      return {
+        ...state,
+        current: action.payload,
+        loading: false
+      }
 
     case FETCH_ERROR:
-      return state;
+      return {
+        ...state,
+        error: action.payload,
+      }
 
     case GET_FAVS_FROM_LS:
-      return state;
+      return {
+        ...state,
+        favs: readFavsFromLocalStorage() ?? initial.favs,
+      }
+
+    case DELETE_ALL:
+      localStorage.clear();
+      return {
+        ...state,
+        favs: initial.favs,
+      }
 
     default:
       return state;
